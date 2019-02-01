@@ -7,6 +7,7 @@ local inicfg = require 'inicfg'
 local sampev = require 'lib.samp.events'
 local imgui = require 'imgui' -- загружаем библиотеку
 local encoding = require 'encoding' -- загружаем библиотеку
+local dlstatus = require('moonloader').download_status
 local wm = require 'lib.windows.message'
 local gk = require 'game.keys'
 local second_window = imgui.ImBool(false)
@@ -16,6 +17,7 @@ local bMainWindow = imgui.ImBool(false)
 local sInputEdit = imgui.ImBuffer(128)
 local bIsEnterEdit = imgui.ImBool(false)
 local ystwindow = imgui.ImBool(false)
+local updwindows = imgui.ImBool(false)
 local tEditData = {
 	id = -1,
 	inputActive = false
@@ -180,6 +182,7 @@ function main()
   print(frakc)
   print(rang)
   ystf()
+  update()
   local spawned = sampIsLocalPlayerSpawned()
   for k, v in pairs(tBindList) do
 		rkeys.registerHotKey(v.v, true, onHotKey)
@@ -865,6 +868,44 @@ function fthmenu(id)
 }
 end
 
+function update()
+	local fpath = os.getenv('TEMP') .. '\\update.json'
+	downloadUrlToFile('https://raw.githubusercontent.com/Damein68/test/master/update.json', fpath, function(id, status, p1, p2)
+		if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+            local f = io.open(fpath, 'r')
+            if f then
+			    local info = decodeJson(f:read('*a'))
+                updatelink = info.updateurl
+                updlist1 = info.updlist
+                ttt = updlist1
+			    if info and info.latest then
+                    version = tonumber(info.latest)
+                    if version > tonumber(thisScript().version) then
+                        ftext('Обнаружено обновление. Для обновления нажмите кнопку в окошке.')
+                        ftext('Примечание: Если у вас не появилось окошко введите /tset')
+					    updwindows.v = true
+                    else
+                        ftext('Обновлений скрипта не обнаружено. Приятной игры.', -1)
+                        update = false
+				    end
+			    end
+		    end
+	    end
+    end)
+end
+
+--скачивание актуальной версии
+function goupdate()
+    ftext('Началось скачивание обновления. Скрипт перезагрузится через пару секунд.', -1)
+    wait(300)
+    downloadUrlToFile(updatelink, thisScript().path, function(id3, status1, p13, p23)
+    if status1 == dlstatus.STATUS_ENDDOWNLOADDATA then
+        showCursor(false)
+	    thisScript():reload()
+    end
+end)
+end
+
 do
 
 function imgui.OnDrawFrame()
@@ -921,6 +962,33 @@ function imgui.OnDrawFrame()
     end
     imgui.End()
    end
+   if updwindows.v then
+                local updlist = ttt
+                imgui.LockPlayer = true
+                imgui.ShowCursor = true
+                local iScreenWidth, iScreenHeight = getScreenResolution()
+                imgui.SetNextWindowPos(imgui.ImVec2(iScreenWidth / 2, iScreenHeight / 2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
+                imgui.SetNextWindowSize(imgui.ImVec2(700, 290), imgui.Cond.FirstUseEver)
+                imgui.Begin(u8('Inst Tools | Обновление'), updwindows, imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoResize)
+                imgui.Text(u8('Вышло обновление данного скрипта Что бы обновиться нажмите кнопку внизу. Список изменений:'))
+                imgui.Separator()
+                imgui.BeginChild("uuupdate", imgui.ImVec2(690, 200))
+                for line in ttt:gmatch('[^\r\n]+') do
+                    imgui.Text(line)
+                end
+                imgui.EndChild()
+                imgui.Separator()
+                imgui.PushItemWidth(305)
+                if imgui.Button(u8("Обновить"), imgui.ImVec2(339, 25)) then
+                    lua_thread.create(goupdate)
+                    updwindows.v = false
+                end
+                imgui.SameLine()
+                if imgui.Button(u8("Отложить обновление"), imgui.ImVec2(339, 25)) then
+                    updwindows.v = false
+                end
+                imgui.End()
+            end
     if ystwindow.v then
                 imgui.LockPlayer = true
                 imgui.ShowCursor = true
