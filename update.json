@@ -1,8 +1,5 @@
 {
-  "latest": "2.1",
-  "updateurl": "https://raw.githubusercontent.com/WhackerH/kirya/master/fbitools.lua",
+  "latest": "2.5",
+  "updateurl": "https://github.com/Damein68/test/blob/master/Intools.lua",
   "updlist": "
-  1. Возвращена отыгровка /ticket
-  2. Добавлена настройка клавиш для быстрого взаимодействия с преступником
-  3. Исправлена настойка задержки"
 }
