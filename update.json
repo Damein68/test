@@ -1,6 +1,8 @@
 {
-"latest": "2.5",
+  "latest": "2.4",
   "updateurl": "https://raw.githubusercontent.com/Damein68/test/master/Intools.lua",
   "updlist": "
-  1.SSSsdsd
+  1. Возвращена отыгровка /ticket
+  2. Добавлена настройка клавиш для быстрого взаимодействия с преступником
+  3. Исправлена настойка задержки"
 }
